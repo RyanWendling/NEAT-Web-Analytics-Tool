@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Small Multiple</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="homecss.css">
+    </head>
+    <body>
+        <header>
+            <br><h1> NEAT Lab Web Analytics Tool </h1><br>
+        </header>
+        <aside>
+            <p> Choose a participant: </p>
+            <select id="partID">
+                <option value="6000">6000</option>
+                <option value="6001">6001</option>
+                <option value="6002">6002</option>
+                <option value="6003">6003</option>
+                <option value="6006">6006</option>
+                <option value="6007">6007</option>
+                <option value="6008">6008</option>
+                <option value="6010">6010</option>
+                <option value="6011">6011</option>
+                <option value="6012">6012</option>
+                <option value="6013">6013</option>
+                <option value="6014">6014</option>
+                <option value="6015">6015</option>
+                <option value="6016">6016</option>
+                <option value="6019">6019</option>
+                <option value="6020">6020</option>
+                <option value="6021">6021</option>
+                <option value="6023">6023</option>
+                <option value="6025">6025</option>
+                <option value="6027">6027</option>
+                <option value="6030">6030</option>
+                <option value="6032">6032</option>
+            </select>
+            <br><br><br>
+            <p> Choose a visualization: </p>
+            <form id="visualizationType">
+                <p> Individual </p>
+
+                <input type="radio" name="visulaizatio" value="Small Multiple"> Detailed Small Multiple <br>
+                <input type="radio" name="visulaizatio" value="Heat Map"> Heat Map <br>
+                <input type="radio" name="visulaizatio" value="Stream Graph"> Stream Graph
+
+                <p> Comparison </p>
+                <input type="radio" name="visulaizatio" value="Average Small Multiple"> Average Small Multiple <br>
+                <input type="radio" name="visulaizatio" value="Stacked Bar Chart"> Stacked Bar Chart <br>
+            </form>
+
+            <br><br>
+            <input type="button" 
+                   value="GO" 
+                   onclick="draw()" />
+            <input type="button" 
+                   value="CLEAR" 
+                   onclick="reload()" />
+            <br>
+        </aside>
+
+        <section>
+            <br>
+            <h3 id="title"> </h3>
+        </section>
+
+        <script src="http://d3js.org/d3.v2.js"></script>
+        <script src="draw.js" type="text/javascript"></script> 
+        <script>
+            var user = window.localStorage.getItem("user");
+            var fileName = "csv/streamGraphData/" + user + ".csv";
+            
+            //Not enough data to generate a stream graph for participants 6023 and 6025
+            if((user === "6023") || (user === "6025")){
+                var message = "NOT ENOUGH DATA TO GENERATE A STREAM GRAPH FOR PARTICIPANT " + user;
+                document.getElementById("title").innerHTML = message;
+            }
+            else {
+                var title = "Stream Graph representation of participant " + user + "'s stress intensity";
+                document.getElementById("title").innerHTML = title;
+                
+                var colorrange = ["#023E60", "#045A8D", "#2B8CBE", "#527893", "#74A9CF", "#A6BDDB", "#D0D1E6", "#F1EEF6"];
+                var datearray = [];
+
+                strokecolor = colorrange[0];
+
+                var format = d3.time.format("%H");
+                var pro;
+                var margin = {top: 8, right: 65, bottom: 2, left: 40},
+                        width = 1000 - margin.left - margin.right,
+                        height = 400 - margin.top - margin.bottom;
+
+                var tooltip = d3.select("body")
+                        .append("div")
+                        .attr("class", "remove")
+                        .style("position", "absolute")
+                        .style("z-index", "20")
+                        .style("visibility", "hidden")
+                        .style("top", "30px")
+                        .style("left", "55px");
+
+                var x = d3.time.scale()
+                        .range([0, width]);
+
+                var y = d3.scale.linear()
+                        .range([height - 10, 0]);
+
+                var z = d3.scale.ordinal()
+                        .range(colorrange);
+
+                var xAxis = d3.svg.axis()
+                        .scale(x)
+                        .orient("bottom")
+                        .ticks(d3.time.weeks);
+
+                var yAxis = d3.svg.axis()
+                        .scale(y);
+
+                var yAxisr = d3.svg.axis()
+                        .scale(y);
+
+                var stack = d3.layout.stack()
+                        .offset("silhouette")
+                        .values(function (d) {
+                            return d.values;
+                        })
+                        .x(function (d) {
+                            return d.date;
+                        })
+                        .y(function (d) {
+                            return d.value;
+                        });
+
+                var nest = d3.nest()
+                        .key(function (d) {
+                            return d.key;
+                        });
+
+                var area = d3.svg.area()
+                        .interpolate("cardinal")
+                        .x(function (d) {
+                            return x(d.date);
+                        })
+                        .y0(function (d) {
+                            return y(d.y0);
+                        })
+                        .y1(function (d) {
+                            return y(d.y0 + d.y);
+                        });
+
+                var svg = d3.select("body").append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                var graph = d3.csv(fileName, function (data) {
+                    data.forEach(function (d) {
+                        d.date = format.parse(d.date);
+                        d.value = +d.value;
+                    });
+
+                    var layers = stack(nest.entries(data));
+
+                    x.domain(d3.extent(data, function (d) {
+                        return d.date;
+                    }));
+                    y.domain([0, d3.max(data, function (d) {
+                            return d.y0 + d.y;
+                        })]);
+
+                    svg.selectAll(".layer")
+                            .data(layers)
+                            .enter().append("path")
+                            .attr("class", "layer")
+                            .attr("d", function (d) {
+                                return area(d.values);
+                            })
+                            .style("fill", function (d, i) {
+                                return z(i);
+                            });
+
+                    svg.append("g")
+                            .attr("class", "y axis")
+                            .attr("transform", "translate(" + width + ", 0)")
+                            .call(yAxis.orient("right"));
+
+                    svg.append("g")
+                            .attr("class", "y axis")
+                            .call(yAxis.orient("left"));
+                    
+                    svg.append("g")
+                            .attr("class", "x axis")
+                            .attr("transform", "translate(0," + height + ")")
+                            .call(xAxis);
+
+                    svg.selectAll(".layer")
+                            .attr("opacity", 1)
+                            .on("mouseover", function (d, i) {
+                                svg.selectAll(".layer").transition()
+                                        .duration(250)
+                                        .attr("opacity", function (d, j) {
+                                            return j != i ? 0.6 : 1;
+                                        })
+                            })
+
+                            .on("mousemove", function (d, i) {
+                                mousex = d3.mouse(this);
+                                mousex = mousex[0];
+                                var invertedx = x.invert(mousex);
+                                invertedx = invertedx.getMonth() + invertedx.getDate();
+                                var selected = (d.values);
+                                for (var k = 0; k < selected.length; k++) {
+                                    datearray[k] = selected[k].date
+                                    datearray[k] = datearray[k].getMonth() + datearray[k].getDate();
+                                }
+
+                                mousedate = datearray.indexOf(invertedx);
+                                pro = d.values[mousedate].value;
+
+                                d3.select(this)
+                                        .classed("hover", true)
+                                        .attr("stroke", strokecolor)
+                                        .attr("stroke-width", "0.5px"),
+                                        tooltip.html("<p>" + d.key + "<br>" + pro + "</p>").style("visibility", "visible");
+
+                            })
+                            .on("mouseout", function (d, i) {
+                                svg.selectAll(".layer")
+                                        .transition()
+                                        .duration(250)
+                                        .attr("opacity", "1");
+                                d3.select(this)
+                                        .classed("hover", false)
+                                        .attr("stroke-width", "0px"), tooltip.html("<p>" + d.key + "<br>" + pro + "</p>").style("visibility", "hidden");
+                            })
+
+                    var vertical = d3.select(".chart")
+                            .append("div")
+                            .attr("class", "remove")
+                            .style("position", "absolute")
+                            .style("z-index", "19")
+                            .style("width", "1px")
+                            .style("height", "380px")
+                            .style("top", "10px")
+                            .style("bottom", "30px")
+                            .style("left", "0px")
+                            .style("background", "#fff");
+
+                    d3.select(".chart")
+                            .on("mousemove", function () {
+                                mousex = d3.mouse(this);
+                                mousex = mousex[0] + 5;
+                                vertical.style("left", mousex + "px")
+                            })
+                            .on("mouseover", function () {
+                                mousex = d3.mouse(this);
+                                mousex = mousex[0] + 5;
+                                vertical.style("left", mousex + "px")
+                            });
+                });
+            }
+            
+            function reload() {
+                window.location.href = "home.html";
+            }
+            
+            function draw() {
+                var user = getUser();
+                var vizualizationChosen = getVisualization();
+                runVisualization(user, vizualizationChosen);
+            }
+            
+            function getUser() {
+                var id = document.getElementById("partID");
+                var user = id.options[id.selectedIndex].value;
+                return user;
+            }
+            
+            function getVisualization() {
+                var buttons = document.getElementById("visualizationType");
+                var length = buttons.length;
+                for (var i = 0; i < length; i++) {
+                    if (buttons[i].checked) {
+                        return buttons[i].value;
+                    }
+                }
+                alert("Please select a visualization type.");
+            }
+        </script>
+    </body>
+</html>

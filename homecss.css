@@ -1,0 +1,115 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : May 3, 2017, 10:28:57 PM
+    Author     : blllennn
+*/
+
+body {
+    background-color: #E2E2E2;
+    margin: 0;
+    color: #fff;
+}
+
+.line {
+    fill: none;
+    stroke: #727272;
+    stroke-width: 1.5px;
+}
+
+.area {
+    fill: #76A3DB;
+}
+
+select{
+    font-family:Book Antiqua;
+}
+
+input{
+    background-color: #76A3DB;
+}
+
+h1{
+    font-size: 45px;
+    color: #76A3DB;
+    text-align: center;
+}
+
+h3{
+    text-align: center;
+    color: #000;
+}
+
+form, select{
+    margin-left: 20px;
+}
+
+aside {
+    background-color: #bbb;
+    float: left;
+    max-width: 160px;
+    margin: 0;
+    padding: 1em;
+    height: 5000px;
+    color: #000;
+}
+
+header{
+    background-color: #333;
+}
+
+section {
+    margin-top: 0;
+    margin-left: 200px;
+}
+svg{
+    padding-bottom: 2em;
+    padding-left: 2em;
+}
+
+.axis .domain {
+    display: none;
+}
+
+.chart { 
+    background: #fff;
+}
+
+.axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    stroke-width: 2px;
+    shape-rendering: crispEdges;
+}
+
+button {
+    position: absolute;
+    right: 50px;
+    top: 10px;
+}
+
+rect.bordered {
+    stroke: #E6E6E6;
+    stroke-width:2px;   
+}
+
+text.mono {
+    font-size: 9pt;
+    font-family: Consolas, courier;
+    fill: #aaa;
+}
+
+text.axis-workweek {
+    fill: #000;
+}
+
+text.axis-worktime {
+    fill: #000;
+}
+
+input{
+    align-items: center;
+}

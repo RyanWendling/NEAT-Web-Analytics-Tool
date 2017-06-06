@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>NEAT Lab Web Analytics Tool</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="homecss.css">
+    </head>
+    <body>
+        <header>
+            <br><h1> NEAT Lab Web Analytics Tool </h1><br>
+        </header>
+        <aside>
+            <p> Choose a participant: </p>
+            <select id="partID">
+                <option value="6000">6000</option>
+                <option value="6001">6001</option>
+                <option value="6002">6002</option>
+                <option value="6003">6003</option>
+                <option value="6006">6006</option>
+                <option value="6007">6007</option>
+                <option value="6008">6008</option>
+                <option value="6010">6010</option>
+                <option value="6011">6011</option>
+                <option value="6012">6012</option>
+                <option value="6013">6013</option>
+                <option value="6014">6014</option>
+                <option value="6015">6015</option>
+                <option value="6016">6016</option>
+                <option value="6019">6019</option>
+                <option value="6020">6020</option>
+                <option value="6021">6021</option>
+                <option value="6023">6023</option>
+                <option value="6025">6025</option>
+                <option value="6027">6027</option>
+                <option value="6030">6030</option>
+                <option value="6032">6032</option>
+            </select>
+            <br><br><br>
+            <p> Choose a visualization: </p>
+            <form id="visualizationType">
+                <p> Individual </p>
+
+                <input type="radio" name="visulaizatio" value="Small Multiple"> Detailed Small Multiple <br>
+                <input type="radio" name="visulaizatio" value="Heat Map"> Heat Map <br>
+                <input type="radio" name="visulaizatio" value="Stream Graph"> Stream Graph
+
+                <p> Comparison </p>
+                <input type="radio" name="visulaizatio" value="Average Small Multiple"> Average Small Multiple <br>
+                <input type="radio" name="visulaizatio" value="Stacked Bar Chart"> Stacked Bar Chart <br>
+            </form>
+
+            <br><br>
+            <input type="button" 
+                   value="GO" 
+                   onclick="draw()" />
+            <input type="button" 
+                   value="CLEAR" 
+                   onclick="reload()" />
+            <br>
+        </aside>
+
+        <section>
+            <br>
+            <h3 id="title"> </h3>
+            
+            <div id="dataset-picker"></div>
+        </section>
+
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script src="draw.js" type="text/javascript"></script>
+        <script>
+
+            var singleInstance = 0;
+
+            function getUser() {
+                var id = document.getElementById("partID");
+                var user = id.options[id.selectedIndex].value;
+                return user;
+            }
+
+            function getVisualization() {
+                var buttons = document.getElementById("visualizationType");
+                var length = buttons.length;
+                for (var i = 0; i < length; i++) {
+                    if (buttons[i].checked) {
+                        return buttons[i].value;
+                    }
+                }
+                alert("Please select a visualization type.")
+            }
+
+            function draw() {
+                var user = getUser();
+                var vizualizationChosen = getVisualization();
+                runVisualization(user, vizualizationChosen);
+            }
+            
+            function reload(){
+                location.reload();
+            }
+        </script>
+    </body>
+</html>

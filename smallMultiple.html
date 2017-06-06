@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Small Multiple</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="homecss.css">
+    </head>
+    <body>
+        <header>
+            <br><h1> NEAT Lab Web Analytics Tool </h1><br>
+        </header>
+        <aside>
+            <p> Choose a participant: </p>
+            <select id="partID">
+                <option value="6000">6000</option>
+                <option value="6001">6001</option>
+                <option value="6002">6002</option>
+                <option value="6003">6003</option>
+                <option value="6006">6006</option>
+                <option value="6007">6007</option>
+                <option value="6008">6008</option>
+                <option value="6010">6010</option>
+                <option value="6011">6011</option>
+                <option value="6012">6012</option>
+                <option value="6013">6013</option>
+                <option value="6014">6014</option>
+                <option value="6015">6015</option>
+                <option value="6016">6016</option>
+                <option value="6019">6019</option>
+                <option value="6020">6020</option>
+                <option value="6021">6021</option>
+                <option value="6023">6023</option>
+                <option value="6025">6025</option>
+                <option value="6027">6027</option>
+                <option value="6030">6030</option>
+                <option value="6032">6032</option>
+            </select>
+            <br><br><br>
+            <p> Choose a visualization: </p>
+            <form id="visualizationType">
+                <p> Individual </p>
+
+                <input type="radio" name="visulaizatio" value="Small Multiple"> Detailed Small Multiple <br>
+                <input type="radio" name="visulaizatio" value="Heat Map"> Heat Map <br>
+                <input type="radio" name="visulaizatio" value="Stream Graph"> Stream Graph
+
+                <p> Comparison </p>
+                <input type="radio" name="visulaizatio" value="Average Small Multiple"> Average Small Multiple <br>
+                <input type="radio" name="visulaizatio" value="Stacked Bar Chart"> Stacked Bar Chart <br>
+            </form>
+
+            <br><br>
+            <input type="button" 
+                   value="GO" 
+                   onclick="draw()" />
+            <input type="button" 
+                   value="CLEAR" 
+                   onclick="reload()" />
+            <br>
+        </aside>
+
+        <section>
+            <br>
+            <h3 id="title"> </h3>
+            
+            <div id="dataset-picker"></div>
+        </section>
+
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script src="draw.js" type="text/javascript"></script> 
+        <script>
+            var user = window.localStorage.getItem("user");
+            var fileName = "csv/smallMultipleData/" + user + "data.csv";
+    
+            var title = "Small Multiple representation of participant " + user + "'s stress intensity";
+            document.getElementById("title").innerHTML = title;
+                
+            var margin = {top: 18, right: 30, bottom: 22, left: 30},
+                    width = 1050 - margin.left - margin.right,
+                    height = 120 - margin.top - margin.bottom;
+
+            var parseDate = d3.timeParse("%H:%M:%S");
+
+            var x = d3.scaleTime()
+                    .range([0, width]);
+
+            var y = d3.scaleLinear()
+                    .range([height, 0]);
+
+            var area = d3.area()
+                    .x(function (d) {
+                        return x(d.time);
+                    })
+                    .y0(height)
+                    .y1(function (d) {
+                        return y(d.stress);
+                    });
+
+            var line = d3.line()
+                    .x(function (d) {
+                        return x(d.time);
+                    })
+                    .y(function (d) {
+                        return y(d.stress);
+                    });
+
+            d3.csv(fileName, type, function (error, data) {
+
+                // Nest data by date.
+                var dates = d3.nest()
+                        .key(function (d) {
+                            return d.date;
+                        })
+                        .entries(data);
+
+                // Compute the maximum stress per date, needed for the y-domain.
+                dates.forEach(function (s) {
+                    s.maxPrice = d3.max(s.values, function (d) {
+                        return d.stress;
+                    });
+                });
+
+                // Compute the minimum and maximum time across dates.
+                // We assume values are sorted by time.
+                x.domain([
+                    d3.min(dates, function (s) {
+                        return s.values[0].time;
+                    }),
+                    d3.max(dates, function (s) {
+                        return s.values[s.values.length - 1].time;
+                    })
+                ]);
+
+                // Add an SVG element for each date, with the desired dimensions and margin.
+                var svg = d3.select("body").selectAll("svg")
+                        .data(dates)
+                        .enter().append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                // Add the X Axis
+                svg.append("g")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(d3.axisBottom(x));
+
+                // Add the Y Axis
+                svg.append("g")
+                        .call(d3.axisLeft(y));
+
+                // Add the area path elements. Note: the y-domain is set per element.
+                svg.append("path")
+                        .attr("class", "area")
+                        .attr("d", function (d) {
+                            y.domain([0, d.maxPrice]);
+                            return area(d.values);
+                        });
+
+                // Add the line path elements. Note: the y-domain is set per element.
+                svg.append("path")
+                        .attr("class", "line")
+                        .attr("d", function (d) {
+                            y.domain([0, d.maxPrice]);
+                            return line(d.values);
+                        });
+
+                // Add a small label for the date name.
+                svg.append("text")
+                        .attr("x", width - 6)
+                        .attr("y", height - 6)
+                        .style("text-anchor", "end")
+                        .text(function (d) {
+                            return d.key;
+                        });
+            });
+
+            function type(d) {
+                d.stress = +d.stress;
+                d.time = parseDate(d.time);
+                return d;
+            }
+
+            function reload() {
+                window.location.href = "home.html";
+            }
+            
+            function draw() {
+                var user = getUser();
+                var vizualizationChosen = getVisualization();
+                runVisualization(user, vizualizationChosen);
+            }
+            
+            function getUser() {
+                var id = document.getElementById("partID");
+                var user = id.options[id.selectedIndex].value;
+                return user;
+            }
+            
+            function getVisualization() {
+                var buttons = document.getElementById("visualizationType");
+                var length = buttons.length;
+                for (var i = 0; i < length; i++) {
+                    if (buttons[i].checked) {
+                        return buttons[i].value;
+                    }
+                }
+                alert("Please select a visualization type.");
+            }
+        </script>
+    </body>
+</html>
