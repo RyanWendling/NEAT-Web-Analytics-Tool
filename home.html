@@ -6,14 +6,14 @@ and open the template in the editor.
 -->
 <html>
     <head>
-        <title>NEAT Lab Web Analytics Tool</title>
+        <title>MyQuitPal Web Analytics Tool</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" type="text/css" href="homecss.css">
     </head>
     <body>
         <header>
-            <br><h1> NEAT Lab Web Analytics Tool </h1><br>
+            <br><h1> MyQuitPal Web Analytics Tool </h1><br>
         </header>
         <aside>
             <p> Choose a participant: </p>
@@ -75,15 +75,17 @@ and open the template in the editor.
         <script src="https://d3js.org/d3.v4.min.js"></script>
         <script src="draw.js" type="text/javascript"></script>
         <script>
-
+            //To make sure the visualization don't repeat on the same page
             var singleInstance = 0;
-
+            
+            //Get the user from the spinner
             function getUser() {
                 var id = document.getElementById("partID");
                 var user = id.options[id.selectedIndex].value;
                 return user;
             }
-
+            
+            //Get the selcted visualization from the radio buttons and make an alert if nothing is selected
             function getVisualization() {
                 var buttons = document.getElementById("visualizationType");
                 var length = buttons.length;
@@ -95,12 +97,14 @@ and open the template in the editor.
                 alert("Please select a visualization type.")
             }
 
+            //Call runVisualization in draw.js to run the correct visualization file
             function draw() {
                 var user = getUser();
                 var vizualizationChosen = getVisualization();
                 runVisualization(user, vizualizationChosen);
             }
             
+            //When clear is selected reload this page
             function reload(){
                 location.reload();
             }

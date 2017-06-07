@@ -7,7 +7,7 @@
     </head>
     <body>
         <header>
-            <br><h1> NEAT Lab Web Analytics Tool </h1><br>
+            <br><h1> MyQuitPal Web Analytics Tool </h1><br>
         </header>
         <aside>
             <p> Choose a participant: </p>
@@ -70,9 +70,14 @@
 
         <script>
             var user = window.localStorage.getItem("user");
-            //var fileName = "csv/heatMapData/" + user + ".csv";
-            var fileName = "csv/heatMapData/6010.csv";
-
+            
+            if((user === "6000") || (user === "6008")){
+                var fileName = "csv/heatMapData/" + user + ".csv";
+            }
+            else{
+                var fileName = "csv/heatMapData/6010.csv";
+            }
+            
             var title = "Heatmap representation of participant " + user + "'s stress intensity";
             document.getElementById("title").innerHTML = title;
 
@@ -82,9 +87,12 @@
                     gridSize = Math.floor(width / 24),
                     legendElementWidth = gridSize * 2,
                     buckets = 9,
+                    // These are the colors of the heatmap. We stuck with yellows, greens and reds
+                    // to indicate that stress levels were high if a cell was red
                     colors = ["#ffffbf", "#d9ef8b", "#91cf60", "#1a9850", "#fc8d59", "#d73027"],
                     dates = ["2014-11-24", "2014-12-17", "2014-12-18"]
 
+            // This is the time range - a 24hour day
             times = ["1a", "2a", "3a", "4a", "5a", "6a", "7a", "8a", "9a", "10a", "11a", "12a", "1p", "2p", "3p", "4p", "5p", "6p", "7p", "8p", "9p", "10p", "11p", "12p"];
             datasets = [fileName];
 
@@ -94,6 +102,7 @@
                     .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+            // This instantiates the time range (the 24hour day labels)
             var timeLabels = svg.selectAll(".timeLabel")
                     .data(times)
                     .enter().append("text")
@@ -110,6 +119,7 @@
                         return ((i >= 7 && i <= 16) ? "timeLabel mono axis axis-worktime" : "timeLabel mono axis");
                     });
 
+            // The datasets variable is for the different csv files
             d3.csv(datasets[0],
                     function (d) {
                         return {
@@ -138,7 +148,6 @@
                                 .attr("x", function (d) {
                                     return (d.hour - 1) * gridSize;
                                 })
-                                //return (d.hour - 1) * gridSize; })
                                 .attr("y", function (d) {
                                     return (d.date - 1) * gridSize;
                                 })
@@ -207,22 +216,26 @@
                         heatmapChart(d);
                     });
 
+            //When clear is selected go to home page
             function reload() {
                 window.location.href = "home.html";
             }
 
+            //Call runVisualization in draw.js to run the correct visualization file
             function draw() {
                 var user = getUser();
                 var vizualizationChosen = getVisualization();
                 runVisualization(user, vizualizationChosen);
             }
 
+            //Get the user from the spinner
             function getUser() {
                 var id = document.getElementById("partID");
                 var user = id.options[id.selectedIndex].value;
                 return user;
             }
 
+            //Get the selcted visualization from the radio buttons and make an alert if nothing is selected
             function getVisualization() {
                 var buttons = document.getElementById("visualizationType");
                 var length = buttons.length;

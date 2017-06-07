@@ -13,7 +13,7 @@ and open the template in the editor.
     </head>
     <body>
         <header>
-            <br><h1> NEAT Lab Web Analytics Tool </h1><br>
+            <br><h1> MyQuitPal Web Analytics Tool </h1><br>
         </header>
         <aside>
             <p> Choose a participant: </p>
@@ -218,22 +218,26 @@ and open the template in the editor.
                                 });
                     });
 
+            //When clear is selected go to home page
             function reload() {
                 window.location.href = "home.html";
             }
             
+            //Call runVisualization in draw.js to run the correct visualization file
             function draw() {
                 var user = getUser();
                 var vizualizationChosen = getVisualization();
                 runVisualization(user, vizualizationChosen);
             }
             
+            //Get the user from the spinner
             function getUser() {
                 var id = document.getElementById("partID");
                 var user = id.options[id.selectedIndex].value;
                 return user;
             }
             
+            //Get the selcted visualization from the radio buttons and make an alert if nothing is selected
             function getVisualization() {
                 var buttons = document.getElementById("visualizationType");
                 var length = buttons.length;
